@@ -30,6 +30,12 @@ pub fn init_schema(conn: &Connection) -> Result<()> {
             progress_done     INTEGER NOT NULL DEFAULT 0
         );
         INSERT OR IGNORE INTO sync_state (id) VALUES (1);
+
+        -- a felhasználó által "törölt" (az Egyéb alá olvasztott) szervezetek SLD-i;
+        -- a sync ezeket is az Egyéb gyűjtőbe sorolja, így a törlés re-sync után is megmarad.
+        CREATE TABLE IF NOT EXISTS merged_orgs (
+            sld TEXT PRIMARY KEY
+        );
         "#,
     )?;
     Ok(())
@@ -52,6 +58,7 @@ mod tests {
         assert!(tables.contains(&"organizations".to_string()));
         assert!(tables.contains(&"contacts".to_string()));
         assert!(tables.contains(&"sync_state".to_string()));
+        assert!(tables.contains(&"merged_orgs".to_string()));
     }
 
     #[test]

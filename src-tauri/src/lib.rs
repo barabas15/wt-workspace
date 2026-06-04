@@ -32,6 +32,7 @@ pub fn run() {
             commands::start_sync,
             commands::get_contacts,
             commands::get_organizations,
+            commands::delete_organization,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

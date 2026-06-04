@@ -7,4 +7,5 @@ export const api = {
   startSync: () => invoke<void>("start_sync"),
   getContacts: () => invoke<Contact[]>("get_contacts"),
   getOrganizations: () => invoke<Organization[]>("get_organizations"),
+  deleteOrganization: (domain: string) => invoke<void>("delete_organization", { domain }),
 };

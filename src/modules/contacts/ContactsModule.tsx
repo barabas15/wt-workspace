@@ -68,6 +68,18 @@ export function ContactsModule() {
     }
   };
 
+  const onDeleteOrg = async (domain: string) => {
+    if (!window.confirm("Biztosan törlöd ezt a csoportot? A tagjai az „Egyéb” alá kerülnek (újraszinkronnál is).")) {
+      return;
+    }
+    try {
+      await api.deleteOrganization(domain);
+      await loadData();
+    } catch (err) {
+      alert(`Nem sikerült törölni a csoportot: ${err}`);
+    }
+  };
+
   return (
     <div className="contacts-module">
       <header className="cm-bar">
@@ -96,7 +108,7 @@ export function ContactsModule() {
       </header>
       <div className="cm-split">
         <div className="cm-list">
-          <ContactList contacts={contacts} organizations={orgs} selectedEmail={selected} onSelect={setSelected} />
+          <ContactList contacts={contacts} organizations={orgs} selectedEmail={selected} onSelect={setSelected} onDeleteOrg={onDeleteOrg} />
         </div>
         <div className="cm-graph">
           <ContactGraph contacts={contacts} organizations={orgs} selectedEmail={selected} onSelect={setSelected} />

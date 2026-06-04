@@ -9,9 +9,10 @@ interface Props {
   organizations: Organization[];
   selectedEmail: string | null;
   onSelect: (email: string) => void;
+  onDeleteOrg?: (domain: string) => void;
 }
 
-export function ContactList({ contacts, organizations, selectedEmail, onSelect }: Props) {
+export function ContactList({ contacts, organizations, selectedEmail, onSelect, onDeleteOrg }: Props) {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("name");
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
@@ -39,17 +40,30 @@ export function ContactList({ contacts, organizations, selectedEmail, onSelect }
       </div>
       <div className="cl-groups">
         {groups.map(({ org, contacts: cs }) => {
-          const isCollapsed = collapsed[org.domain] ?? org.is_personal;
+          // a csoportok alapból CSUKVA vannak
+          const isCollapsed = collapsed[org.domain] ?? true;
           return (
             <div key={org.domain} className="cl-group">
-              <button
-                className="cl-group-header"
-                onClick={() => setCollapsed((c) => ({ ...c, [org.domain]: !isCollapsed }))}
-              >
-                <span>{isCollapsed ? "▸" : "▾"}</span>
-                <span className="cl-group-label">{org.label}</span>
-                <span className="cl-group-count">{cs.length}</span>
-              </button>
+              <div className="cl-group-header">
+                <button
+                  className="cl-group-toggle"
+                  onClick={() => setCollapsed((c) => ({ ...c, [org.domain]: !isCollapsed }))}
+                >
+                  <span>{isCollapsed ? "▸" : "▾"}</span>
+                  <span className="cl-group-label">{org.label}</span>
+                  <span className="cl-group-count">{cs.length}</span>
+                </button>
+                {!org.is_personal && onDeleteOrg && (
+                  <button
+                    className="cl-group-delete"
+                    aria-label={`${org.label} csoport törlése`}
+                    title="Csoport törlése (tagjai az Egyéb alá kerülnek)"
+                    onClick={() => onDeleteOrg(org.domain)}
+                  >
+                    🗑
+                  </button>
+                )}
+              </div>
               {!isCollapsed &&
                 cs.map((c) => (
                   <button

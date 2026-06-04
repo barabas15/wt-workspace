@@ -83,3 +83,10 @@ pub fn get_organizations(state: State<AppState>) -> Result<Vec<OrgAgg>, String> 
     let conn = state.db.lock().map_err(|e| e.to_string())?;
     read_organizations(&conn).map_err(|e| e.to_string())
 }
+
+/// Csoport (szervezet) törlése: tagjai az "Egyéb" alá kerülnek, és re-sync után is törölt marad.
+#[tauri::command]
+pub fn delete_organization(domain: String, state: State<AppState>) -> Result<(), String> {
+    let conn = state.db.lock().map_err(|e| e.to_string())?;
+    crate::db::delete_organization(&conn, &domain).map_err(|e| e.to_string())
+}

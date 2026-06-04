@@ -8,4 +8,7 @@ pub mod label;
 pub use label::org_label;
 
 pub mod aggregate;
-pub use aggregate::{aggregate, Aggregated, ContactAgg, OrgAgg, ParsedMessage, PERSONAL_DOMAIN};
+pub use aggregate::{
+    aggregate, aggregate_with_merges, derive_organizations, Aggregated, ContactAgg, OrgAgg,
+    ParsedMessage, PERSONAL_DOMAIN,
+};

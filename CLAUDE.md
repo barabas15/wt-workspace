@@ -13,7 +13,13 @@ hub & spoke gráfot** + listát jelenít meg (osztott nézet).
 - **Publikus/szabad domainek** (gmail, freemail stb.) → közös **„Egyéb"** gyűjtő.
 - **Egytagú szervezet** (csak 1 kontakt) NEM külön csoport → szintén az **„Egyéb"** gyűjtőbe.
 - Az „Egyéb" a kulcs `PERSONAL_DOMAIN = "__personal__"`, `is_personal=true` (a listában
-  alulra kerül, alapból összecsukva).
+  alulra kerül). **A listában minden csoport alapból CSUKVA.**
+- **Az „Egyéb" NEM jelenik meg a gráfban** (sem a csomópont, sem a tagjai) — `toGraph` kizárja.
+- **Csoportok törölhetők** (kuka ikon a fejlécben, az „Egyéb" kivételével): a tagok az
+  „Egyéb" alá kerülnek, és az SLD bekerül a `merged_orgs` táblába, így a törlés
+  **re-sync után is megmarad** (a `sync` az `aggregate_with_merges`-t hívja). Parancs:
+  `delete_organization(domain)` → `db::delete_organization` (hálózat nélkül újraszámol a
+  tárolt kontaktokból).
 
 - Spec: `docs/superpowers/specs/2026-06-04-gmail-kontakt-workspace-design.md`
 - Részletes terv: `docs/superpowers/plans/2026-06-04-gmail-kontakt-workspace.md`

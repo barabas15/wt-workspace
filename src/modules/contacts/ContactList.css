@@ -2,9 +2,13 @@
 .cl-controls { display: flex; gap: 6px; padding: 8px; border-bottom: 1px solid #eee; }
 .cl-search { flex: 1; padding: 5px 8px; border: 1px solid #dfe1e8; border-radius: 6px; }
 .cl-sort { border: 1px solid #dfe1e8; border-radius: 6px; }
-.cl-groups { overflow-y: auto; flex: 1; }
-.cl-group-header { width: 100%; display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: none; border: none; cursor: pointer; font-weight: 600; color: #4858d8; }
+.cl-groups { overflow-y: auto; flex: 1; scrollbar-gutter: stable; }
+/* a kuka gomb ne kerüljön a görgetősáv alá */
+.cl-group-header { display: flex; align-items: center; padding-right: 8px; }
+.cl-group-toggle { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: none; border: none; cursor: pointer; font-weight: 600; color: #4858d8; text-align: left; }
 .cl-group-count { margin-left: auto; color: #9aa; font-weight: 400; }
+.cl-group-delete { background: none; border: none; cursor: pointer; padding: 4px 9px; opacity: 0.4; font-size: 13px; flex: none; }
+.cl-group-delete:hover { opacity: 1; }
 .cl-row { width: 100%; display: flex; align-items: center; gap: 8px; padding: 5px 12px; background: none; border: none; cursor: pointer; text-align: left; }
 .cl-row.selected { background: #eaedff; }
 .cl-avatar { width: 26px; height: 26px; border-radius: 50%; color: #fff; font-size: 10px; display: flex; align-items: center; justify-content: center; flex: none; }

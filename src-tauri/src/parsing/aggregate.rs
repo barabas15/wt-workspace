@@ -36,6 +36,15 @@ pub struct Aggregated {
 }
 
 pub fn aggregate(messages: &[ParsedMessage]) -> Aggregated {
+    aggregate_with_merges(messages, &std::collections::HashSet::new())
+}
+
+/// Mint az `aggregate`, de a `merged` halmazban szereplő SLD-eket (a felhasználó által
+/// törölt szervezetek) is az "Egyéb" gyűjtőbe sorolja — így a törlés re-sync után megmarad.
+pub fn aggregate_with_merges(
+    messages: &[ParsedMessage],
+    merged: &std::collections::HashSet<String>,
+) -> Aggregated {
     let mut contacts: HashMap<String, ContactAgg> = HashMap::new();
 
     for msg in messages {
@@ -77,19 +86,27 @@ pub fn aggregate(messages: &[ParsedMessage]) -> Aggregated {
         *counts.entry(c.organization_domain.clone()).or_insert(0) += 1;
     }
 
-    // egytagú (nem-"Egyéb") szervezeteket beolvasztjuk a közös "Egyéb" gyűjtőbe:
+    // egytagú VAGY a felhasználó által törölt (merged) szervezeteket az "Egyéb"-be soroljuk:
     // egy szereplőből álló domain ne legyen külön csoport.
     for c in contacts.values_mut() {
         if c.organization_domain != PERSONAL_DOMAIN
-            && counts.get(&c.organization_domain).copied().unwrap_or(0) <= 1
+            && (counts.get(&c.organization_domain).copied().unwrap_or(0) <= 1
+                || merged.contains(&c.organization_domain))
         {
             c.organization_domain = PERSONAL_DOMAIN.to_string();
         }
     }
 
-    // végleges szervezet-lista a (frissített) kontaktokból
+    let contacts: Vec<ContactAgg> = contacts.into_values().collect();
+    let organizations = derive_organizations(&contacts);
+    Aggregated { contacts, organizations }
+}
+
+/// A kontaktok aktuális `organization_domain` mezőiből származtatja a szervezet-listát
+/// (label, is_personal, member_count). A teljes sync és a csoport-törlés is ezt használja.
+pub fn derive_organizations(contacts: &[ContactAgg]) -> Vec<OrgAgg> {
     let mut orgs: HashMap<String, OrgAgg> = HashMap::new();
-    for c in contacts.values() {
+    for c in contacts {
         let is_personal = c.organization_domain == PERSONAL_DOMAIN;
         let label = if is_personal {
             "Egyéb".to_string()
@@ -104,11 +121,7 @@ pub fn aggregate(messages: &[ParsedMessage]) -> Aggregated {
         });
         org.member_count += 1;
     }
-
-    Aggregated {
-        contacts: contacts.into_values().collect(),
-        organizations: orgs.into_values().collect(),
-    }
+    orgs.into_values().collect()
 }
 
 #[cfg(test)]
@@ -183,6 +196,25 @@ mod tests {
         // az acme viszont valódi 2 tagú szervezet maradt
         let acme = agg.organizations.iter().find(|o| o.domain == "acme").unwrap();
         assert_eq!(acme.member_count, 2);
+    }
+
+    #[test]
+    fn merged_org_routed_to_others() {
+        use std::collections::HashSet;
+        // acme 2 tagú -> normál esetben saját csoport; de ha "törölt" (merged), Egyéb alá kerül
+        let msgs = vec![
+            ParsedMessage { counterparts: vec![addr("A", "a@acme.hu")], received: true, date: "2026-01-01".into() },
+            ParsedMessage { counterparts: vec![addr("B", "b@acme.hu")], received: true, date: "2026-01-01".into() },
+        ];
+        let mut merged = HashSet::new();
+        merged.insert("acme".to_string());
+        let agg = aggregate_with_merges(&msgs, &merged);
+        assert!(agg.organizations.iter().all(|o| o.domain != "acme"));
+        for c in &agg.contacts {
+            assert_eq!(c.organization_domain, PERSONAL_DOMAIN);
+        }
+        let others = agg.organizations.iter().find(|o| o.domain == PERSONAL_DOMAIN).unwrap();
+        assert_eq!(others.member_count, 2);
     }
 
     #[test]

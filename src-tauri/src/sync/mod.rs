@@ -1,9 +1,9 @@
 use std::sync::Mutex;
 use std::sync::mpsc;
 use rusqlite::Connection;
-use crate::db::{clear_all, persist_aggregated};
+use crate::db::{clear_all, persist_aggregated, read_merged_orgs};
 use crate::gmail::client::GmailApi;
-use crate::parsing::{aggregate, ParsedMessage};
+use crate::parsing::{aggregate_with_merges, ParsedMessage};
 
 /// Hány párhuzamos szál töltse le a levél-fejléceket egyszerre.
 const FETCH_WORKERS: usize = 8;
@@ -58,7 +58,9 @@ pub fn run_full_sync<A: GmailApi + Sync>(
         collected
     });
 
-    let agg = aggregate(&parsed);
+    // a felhasználó által törölt szervezeteket is az "Egyéb"-be soroljuk (tartós törlés)
+    let merged = read_merged_orgs(conn)?;
+    let agg = aggregate_with_merges(&parsed, &merged);
     // teljes sync = csere: előbb ürítünk, hogy ne duplázódjanak a számlálók és ne
     // maradjanak elavult sorok (pl. korábbi, full-domain kulcsú szervezetek).
     clear_all(conn)?;

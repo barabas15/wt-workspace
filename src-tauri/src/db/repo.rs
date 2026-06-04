@@ -1,5 +1,6 @@
+use std::collections::HashSet;
 use rusqlite::{Connection, Result};
-use crate::parsing::{Aggregated, ContactAgg, OrgAgg};
+use crate::parsing::{derive_organizations, Aggregated, ContactAgg, OrgAgg, PERSONAL_DOMAIN};
 
 /// Kontakt- és szervezet-táblák kiürítése. A teljes sync ezt hívja a perzisztálás
 /// előtt, hogy az eredmény a postafiók AKTUÁLIS állapotát tükrözze (ne adódjon hozzá
@@ -7,6 +8,39 @@ use crate::parsing::{Aggregated, ContactAgg, OrgAgg};
 pub fn clear_all(conn: &Connection) -> Result<()> {
     conn.execute("DELETE FROM contacts", [])?;
     conn.execute("DELETE FROM organizations", [])?;
+    Ok(())
+}
+
+/// A felhasználó által törölt (Egyéb alá olvasztott) szervezet-SLD-k. A sync ezeket is
+/// az "Egyéb" gyűjtőbe sorolja, így a törlés re-sync után is megmarad.
+pub fn read_merged_orgs(conn: &Connection) -> Result<HashSet<String>> {
+    let mut stmt = conn.prepare("SELECT sld FROM merged_orgs")?;
+    let rows = stmt.query_map([], |r| r.get::<_, String>(0))?;
+    rows.collect()
+}
+
+/// Egy SLD felvétele a "törölt" szervezetek közé (idempotens).
+pub fn add_merged_org(conn: &Connection, sld: &str) -> Result<()> {
+    conn.execute(
+        "INSERT OR IGNORE INTO merged_orgs (sld) VALUES (?1)",
+        rusqlite::params![sld],
+    )?;
+    Ok(())
+}
+
+/// Csoport törlése: az SLD-t tartósan a "törölt" közé veszi, a tagjait az "Egyéb"-be
+/// sorolja, és újraszámolja a szervezet-listát (hálózati sync nélkül, a tárolt kontaktokból).
+pub fn delete_organization(conn: &Connection, sld: &str) -> Result<()> {
+    add_merged_org(conn, sld)?;
+    let mut contacts = read_contacts(conn)?;
+    for c in &mut contacts {
+        if c.organization_domain == sld {
+            c.organization_domain = PERSONAL_DOMAIN.to_string();
+        }
+    }
+    let organizations = derive_organizations(&contacts);
+    clear_all(conn)?;
+    persist_aggregated(conn, &Aggregated { contacts, organizations })?;
     Ok(())
 }
 
