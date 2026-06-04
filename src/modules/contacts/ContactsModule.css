@@ -27,4 +27,24 @@
 .cm-list { width: 42%; min-width: 280px; max-width: 460px; }
 .cm-graph { flex: 1; min-width: 0; background: radial-gradient(circle at 55% 50%, #252d39, var(--bg-0)); }
 /* a react-force-graph canvas a konténer méretét veszi — kell explicit méret, különben 0 */
-.contact-graph { width: 100%; height: 100%; overflow: hidden; }
+.contact-graph { width: 100%; height: 100%; overflow: hidden; position: relative; }
+
+.graph-controls-toggle {
+  position: absolute; top: 10px; right: 10px; z-index: 6;
+  width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+  background: rgba(20, 26, 34, 0.85); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--green); cursor: pointer; opacity: 0.8;
+}
+.graph-controls-toggle:hover { opacity: 1; border-color: var(--green); }
+
+.graph-controls {
+  position: absolute; top: 10px; left: 10px; z-index: 5;
+  width: 220px; max-height: 80%; overflow-y: auto;
+  background: rgba(20, 26, 34, 0.92); border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px; color: var(--text); font-size: 11px;
+}
+.gc-title { font-weight: 700; color: var(--green); margin-bottom: 8px; }
+.gc-row { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
+.gc-row > span:first-child { flex: 1; color: var(--text-dim); }
+.gc-row input[type="range"] { width: 80px; }
+.gc-val { width: 34px; text-align: right; color: var(--text); }

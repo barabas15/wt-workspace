@@ -54,6 +54,10 @@ A nehéz munka (hálózat, parse, aggregálás, perzisztencia) a Rust magban fut
    — Google Cloud OAuth **„Desktop app"** kliens; magad **teszt-felhasználóként** felvéve.
    A `.env.example` csak placeholder — **soha ne tegyél bele valós kulcsot** (nincs gitignore-olva).
 3. `npm install`, majd `npm run tauri dev`.
+4. **Csomagolt build:** `npm run tauri build -- --bundles deb` → `.deb` a
+   `src-tauri/target/release/bundle/deb/`-ben (a deb-only elkerüli az AppImage hálózati letöltését).
+   **Gotcha:** a `tauri` CLI `cargo`-t hív → nem-login shellben (pl. eszközből indított build) tedd a
+   PATH-ra: `export PATH="$HOME/.cargo/bin:$PATH"`, különben „cargo metadata ... No such file" hiba.
 
 ## Tesztek (TDD)
 
@@ -90,13 +94,25 @@ A nehéz munka (hálózat, parse, aggregálás, perzisztencia) a Rust magban fut
   a teljes domain; a `label` a capitalizált SLD ("A1").
 - **Teljes sync = csere:** a `run_full_sync` a perzisztálás előtt `clear_all`-lal üríti a
   táblákat (újraaggregál minden levélből), így nincs dupla számolás és nem maradnak elavult sorok.
-- Gráf: **brain-style force-gráf** (`react-force-graph-2d`, canvas). Csak person-csomópontok
-  (nincs org-hub), fix méret, szervezetenkénti szín (`colorForOrg`); **szervezeten belüli
-  korlátozott háló** (gyűrű + `MESH_K`, lineáris él-szám) a `graph.ts` `toGraph`-jában
-  (`{nodes, links}`). Az „Egyéb" kimarad. **Gráf-node kattintás → bal kereső kitöltése** (a `query`
-  a `ContactsModule`-ban van, `onGraphSelect` setSelected+setQuery; kontrollált `ContactList`,
-  nem-üres keresésnél a csoport auto-kinyílik).
+- Gráf: **WebGL „galaxis"** (`react-force-graph-3d` + `three` + `d3-force-3d`, **3D**, forgatható).
+  Csak person-csomópontok (nincs org-hub), **degree-alapú méret** (hubok nagyobbak), szervezetenkénti
+  szín (`colorForOrg`); **szervezeten belüli korlátozott háló** (gyűrű + `MESH_K`) a `graph.ts`
+  `toGraph`-jában (`{nodes, links}`). Az „Egyéb" kimarad. Rétegek: UnrealBloomPass (bloom),
+  `THREE.Points` csillagpor, d3 charge/link + `forceX/Y/Z` középre-gravitáció, él-részecskék, hover-kiemelés.
+  - **Bloom import-útvonal:** `three/examples/jsm/postprocessing/UnrealBloomPass.js` (NEM `three/addons/...`).
+  - `d3-force-3d`-nek nincs `@types` → `declare module "d3-force-3d"` stub a `src/vite-env.d.ts`-ben.
+  - **Hangoló-panel:** `GraphControls.tsx` (csúszkák); a gráf jobb-felső **fogaskerék-gombja** nyitja/zárja;
+    a beállítások `localStorage` (`wt.graphSettings`) → újratöltés után is megmaradnak; az alapértékek a
+    `DEFAULT_GRAPH_SETTINGS`-ben (a felhasználó hangolásából bedrótozva).
+  - **Gráf-node kattintás → bal kereső kitöltése** (a `query` a `ContactsModule`-ban, `onGraphSelect`
+    setSelected+setQuery; kontrollált `ContactList`, nem-üres keresésnél a csoport auto-kinyílik).
 - DB hely: `dirs::data_dir()/ceges-workspace/workspace.sqlite`.
+
+## App-ikon
+- A zöld **Webtown „W"** a `src-tauri/icons/`-ban (a `tauri.conf.json` `bundle.icon` listája mutat rá).
+  Csere/újragenerálás: `npx tauri icon <forrás.png>` (1024×1024 PNG-ből az összes méret).
+- **FONTOS:** `npm run tauri dev` Linuxon **NEM** mutatja az app-ikont a tálcán/ablakban — csak a
+  **telepített csomag** (`.deb`/AppImage a `.desktop`+ikonnal). Ne ijedj meg, ha dev-ben generikus az ikon.
 
 ## Konvenciók
 

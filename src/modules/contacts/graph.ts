@@ -20,7 +20,8 @@ export interface ForceGraphData {
  * mindenki-mindenkivel helyett ez lineáris él-számot ad, nagy szervezetnél is gyors. */
 export const MESH_K = 2;
 
-const NODE_VAL = 4; // minden ember egyforma méretű
+const NODE_BASE = 3;          // alapméret (izolált node)
+const NODE_PER_DEGREE = 1.1;  // minden kapcsolat ennyivel növel
 
 /** Steampunk node-palettát (sárgaréz/réz/borostyán + 1 patina) ad determinisztikusan. */
 const ORG_COLORS = [
@@ -68,7 +69,7 @@ export function toGraph(contacts: Contact[], orgs: Organization[]): ForceGraphDa
       name: c.display_name || c.email,
       domain: c.organization_domain,
       color: colorForOrg(c.organization_domain),
-      val: NODE_VAL,
+      val: NODE_BASE,
     });
     const arr = byOrg.get(c.organization_domain) ?? [];
     arr.push(id);
@@ -78,6 +79,16 @@ export function toGraph(contacts: Contact[], orgs: Organization[]): ForceGraphDa
   const links: FgLink[] = [];
   for (const ids of byOrg.values()) {
     links.push(...clusterLinks(ids));
+  }
+
+  // node-méret a kapcsolatszámból (degree): a hubok nagyobbak
+  const degree = new Map<string, number>();
+  for (const l of links) {
+    degree.set(l.source, (degree.get(l.source) ?? 0) + 1);
+    degree.set(l.target, (degree.get(l.target) ?? 0) + 1);
+  }
+  for (const n of nodes) {
+    n.val = NODE_BASE + (degree.get(n.id) ?? 0) * NODE_PER_DEGREE;
   }
 
   return { nodes, links };

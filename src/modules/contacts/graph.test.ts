@@ -54,3 +54,14 @@ describe("toGraph (force-graph)", () => {
     expect(colorForOrg("acme")).toMatch(/^#/);
   });
 });
+
+describe("node sizing by degree", () => {
+  it("gives higher val to more-connected nodes (hubs bigger)", () => {
+    const g = toGraph(contacts, orgs);
+    const acme = g.nodes.filter((n) => n.domain === "acme");
+    const beta = g.nodes.filter((n) => n.domain === "beta");
+    const avg = (ns: typeof g.nodes) => ns.reduce((s, n) => s + n.val, 0) / ns.length;
+    expect(avg(acme)).toBeGreaterThan(avg(beta));
+    expect(g.nodes.every((n) => n.val >= 3)).toBe(true);
+  });
+});
