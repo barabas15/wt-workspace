@@ -10,8 +10,8 @@
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-.rail-btn:hover { background: #3a2a1f; color: var(--text); border-color: var(--border); }
-.rail-btn.active { background: var(--accent); color: var(--bg-0); border-color: var(--accent-bright); }
-.rail-icon { font-size: 26px; line-height: 1; }
-.rail-label { font-size: 11px; font-weight: 600; font-family: var(--display-font); letter-spacing: 0.3px; }
+.rail-btn:hover { background: #434c5e; border-color: var(--green); }
+.rail-btn:hover .rail-icon { filter: brightness(1.3); }
+.rail-btn.active { background: var(--bg-3); border-color: var(--green); }
+.rail-icon { font-size: 40px; line-height: 1; color: var(--green); display: flex; align-items: center; justify-content: center; }
 .content { flex: 1; min-width: 0; overflow: hidden; }

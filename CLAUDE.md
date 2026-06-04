@@ -103,11 +103,12 @@ A nehéz munka (hálózat, parse, aggregálás, perzisztencia) a Rust magban fut
 - **Soha ne commitolj/push+olj git-be explicit engedély nélkül** (globális szabály).
   Jelen állapot: a remote `git@github.com:barabas15/wt-workspace.git` bekötve, de a munka
   **nincs commitolva** (a felhasználó kézzel verzióz). `.env` gitignore-olt.
-- Stílus: **dark steampunk** (Mahogany & Amber). Központi `src/theme.css` CSS-tokenek
-  (`--bg-0..3`, `--accent` #e8902f, `--accent-bright`, `--brass` #c9a227, `--copper`, `--text`,
-  `--text-dim`, `--border`, `--display-font`); minden komponens-CSS ezekre hivatkozik (ne írj be
-  nyers színt — a `main.tsx` importálja a `theme.css`-t). Display serif: **Cinzel** (`@fontsource/cinzel`,
-  offline). Sync-jelző: forgó fogaskerék (`.gear-spinner`).
+- Stílus: **Nord (slate & frost)** dark téma. Központi `src/theme.css` CSS-tokenek
+  (`--bg-0..3`, `--accent` #88c0d0 frost cián, `--accent-bright` #aedce0, `--brass` #81a1c1 frost kék,
+  `--copper` #8fbcbb frost zöld, `--text` #d8dee9, `--text-dim`, `--border`, `--display-font`,
+  `color-scheme: dark`); minden komponens-CSS ezekre hivatkozik (ne írj be nyers színt — a `main.tsx`
+  importálja a `theme.css`-t). A gráf canvas-színei a `ContactGraph.tsx`-ben + `ORG_COLORS` a `graph.ts`-ben
+  (Nord frost+aurora). Display-font: system sans. Sync-jelző: forgó fogaskerék (`.gear-spinner`).
 - Rögzítés/jegyzetelés ebbe a fájlba megy (ne belső memóriába).
 
 ## Ismert, nem-blokkoló follow-up-ok

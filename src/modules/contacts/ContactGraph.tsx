@@ -34,10 +34,10 @@ export function ContactGraph({ contacts, organizations, selectedEmail, onSelect 
         width={size.w || 600}
         height={size.h || 400}
         graphData={data}
-        backgroundColor="#120b08"
+        backgroundColor="#20262e"
         nodeId="id"
         nodeLabel="name"
-        linkColor={() => "rgba(201,162,39,0.18)"}
+        linkColor={() => "rgba(136,192,208,0.18)"}
         linkWidth={0.6}
         cooldownTicks={120}
         onNodeClick={(n: any) => onSelect(String(n.id).replace(/^person:/, ""))}
@@ -53,18 +53,18 @@ export function ContactGraph({ contacts, organizations, selectedEmail, onSelect 
           ctx.beginPath();
           ctx.arc(node.x, node.y, r * 3, 0, 2 * Math.PI);
           ctx.fill();
-          ctx.fillStyle = isSel ? "#ffb84d" : node.color;
+          ctx.fillStyle = isSel ? "#aedce0" : node.color;
           ctx.beginPath();
           ctx.arc(node.x, node.y, isSel ? r * 1.6 : r, 0, 2 * Math.PI);
           ctx.fill();
           if (isSel) {
-            ctx.strokeStyle = "#ffe7b3";
+            ctx.strokeStyle = "#d8f0f2";
             ctx.lineWidth = 1.5 / scale;
             ctx.stroke();
           }
           if (scale > 2.2 || isSel) {
             ctx.font = `${11 / scale}px system-ui, sans-serif`;
-            ctx.fillStyle = "#ecd9c0";
+            ctx.fillStyle = "#d8dee9";
             ctx.textAlign = "center";
             ctx.fillText(node.name, node.x, node.y + r * 3 + 9 / scale);
           }

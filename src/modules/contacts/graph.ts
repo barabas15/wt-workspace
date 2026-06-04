@@ -24,8 +24,8 @@ const NODE_VAL = 4; // minden ember egyforma méretű
 
 /** Steampunk node-palettát (sárgaréz/réz/borostyán + 1 patina) ad determinisztikusan. */
 const ORG_COLORS = [
-  "#e8902f", "#c9a227", "#b87333", "#d9a441",
-  "#a8602a", "#caa75a", "#8a6d3b", "#d57a28", "#3fae9f",
+  "#88c0d0", "#81a1c1", "#8fbcbb", "#a3be8c",
+  "#b48ead", "#5e81ac", "#ebcb8b", "#d08770", "#bf616a",
 ];
 export function colorForOrg(domain: string): string {
   let h = 0;

@@ -16,7 +16,7 @@
 .cl-group-delete:hover { color: var(--accent-bright); opacity: 1; }
 
 .cl-row { width: 100%; display: flex; align-items: center; padding-right: 10px; }
-.cl-row.selected { background: rgba(232,144,47,0.16); }
+.cl-row.selected { background: rgba(136,192,208,0.16); }
 .cl-row-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 5px 12px; background: none; border: none; cursor: pointer; text-align: left; color: var(--text); }
 .cl-row-action { flex: none; background: none; border: none; cursor: pointer; padding: 4px 7px; line-height: 1; color: var(--copper); opacity: 0.7; display: inline-flex; align-items: center; }
 .cl-row-action:hover { color: var(--accent-bright); opacity: 1; }

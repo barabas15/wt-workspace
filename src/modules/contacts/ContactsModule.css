@@ -18,13 +18,13 @@
   font-family: var(--display-font); letter-spacing: 0.4px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.4); transition: background 0.15s, box-shadow 0.15s;
 }
-.cm-btn:hover:not(:disabled) { background: var(--accent-bright); box-shadow: 0 2px 7px rgba(232,144,47,0.35); }
+.cm-btn:hover:not(:disabled) { background: var(--accent-bright); box-shadow: 0 2px 7px rgba(136,192,208,0.35); }
 .cm-btn:active:not(:disabled) { background: var(--copper); }
-.cm-btn:disabled { background: #5a4632; color: var(--text-dim); border-color: var(--border); cursor: default; box-shadow: none; }
+.cm-btn:disabled { background: #434c5e; color: var(--text-dim); border-color: var(--border); cursor: default; box-shadow: none; }
 .cm-btn-icon { font-size: 15px; line-height: 1; }
 
 .cm-split { display: flex; flex: 1; min-height: 0; }
 .cm-list { width: 42%; min-width: 280px; max-width: 460px; }
-.cm-graph { flex: 1; min-width: 0; background: radial-gradient(circle at 55% 50%, #1a1009, var(--bg-0)); }
+.cm-graph { flex: 1; min-width: 0; background: radial-gradient(circle at 55% 50%, #252d39, var(--bg-0)); }
 /* a react-force-graph canvas a konténer méretét veszi — kell explicit méret, különben 0 */
 .contact-graph { width: 100%; height: 100%; overflow: hidden; }
