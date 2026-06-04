@@ -1,44 +1,56 @@
 import { describe, it, expect } from "vitest";
-import { toGraph } from "./graph";
+import { toGraph, colorForOrg, MESH_K } from "./graph";
 import type { Contact, Organization } from "./types";
 
+function contact(email: string, org: string): Contact {
+  return { email, display_name: email.split("@")[0], organization_domain: org, message_count: 1, sent_count: 0, received_count: 1, first_seen: "2026-01-01", last_seen: "2026-01-01" };
+}
+
 const orgs: Organization[] = [
-  { domain: "acme", label: "Acme", is_personal: false, member_count: 2 },
-  { domain: "beta", label: "Beta", is_personal: false, member_count: 5 },
+  { domain: "acme", label: "Acme", is_personal: false, member_count: 5 },
+  { domain: "beta", label: "Beta", is_personal: false, member_count: 2 },
   { domain: "__personal__", label: "Egyéb", is_personal: true, member_count: 1 },
 ];
 const contacts: Contact[] = [
-  { email: "a@acme.hu", display_name: "Anna", organization_domain: "acme", message_count: 5, sent_count: 2, received_count: 3, first_seen: "2026-01-01", last_seen: "2026-03-01" },
-  { email: "b@acme.hu", display_name: "Béla", organization_domain: "acme", message_count: 99, sent_count: 9, received_count: 90, first_seen: "2026-01-01", last_seen: "2026-03-01" },
-  { email: "c@beta.hu", display_name: "Cili", organization_domain: "beta", message_count: 3, sent_count: 1, received_count: 2, first_seen: "2026-01-01", last_seen: "2026-03-01" },
-  { email: "x@gmail.com", display_name: "X", organization_domain: "__personal__", message_count: 1, sent_count: 0, received_count: 1, first_seen: "2026-02-01", last_seen: "2026-02-01" },
+  contact("a1@acme.hu", "acme"), contact("a2@acme.hu", "acme"), contact("a3@acme.hu", "acme"),
+  contact("a4@acme.hu", "acme"), contact("a5@acme.hu", "acme"),
+  contact("b1@beta.hu", "beta"), contact("b2@beta.hu", "beta"),
+  contact("x@gmail.com", "__personal__"),
 ];
 
-describe("toGraph", () => {
-  it("excludes the personal/others bucket and its contacts from the graph", () => {
+describe("toGraph (force-graph)", () => {
+  it("emits only person nodes, excluding the personal bucket", () => {
     const g = toGraph(contacts, orgs);
-    expect(g.nodes.find((n) => n.data.id === "org:__personal__")).toBeUndefined();
-    expect(g.nodes.find((n) => n.data.id === "person:x@gmail.com")).toBeUndefined();
-    expect(g.edges.find((e) => e.data.id === "edge:x@gmail.com")).toBeUndefined();
+    expect(g.nodes).toHaveLength(7);
+    expect(g.nodes.every((n) => n.id.startsWith("person:"))).toBe(true);
+    expect(g.nodes.find((n) => n.id === "person:x@gmail.com")).toBeUndefined();
   });
 
-  it("creates only real org/contact nodes plus membership edges", () => {
+  it("links members only WITHIN their organization, never across", () => {
     const g = toGraph(contacts, orgs);
-    const orgNodes = g.nodes.filter((n) => n.data.kind === "org");
-    const personNodes = g.nodes.filter((n) => n.data.kind === "person");
-    expect(orgNodes).toHaveLength(2); // acme + beta (Egyéb kizárva)
-    expect(personNodes).toHaveLength(3); // a, b, c (x kizárva)
-    expect(g.edges).toHaveLength(3);
+    const orgOf = new Map(g.nodes.map((n) => [n.id, n.domain]));
+    for (const l of g.links) {
+      expect(orgOf.get(l.source)).toBe(orgOf.get(l.target));
+      expect(l.source).not.toBe(l.target);
+    }
+    expect(g.links.some((l) => l.source.includes("gmail") || l.target.includes("gmail"))).toBe(false);
   });
 
-  it("org node size scales with member_count, person size is constant", () => {
+  it("caps edges (linear, <= MESH_K * memberCount) but keeps clusters connected", () => {
     const g = toGraph(contacts, orgs);
-    const acme = g.nodes.find((n) => n.data.id === "org:acme")!;
-    const beta = g.nodes.find((n) => n.data.id === "org:beta")!;
-    expect(beta.data.size).toBeGreaterThan(acme.data.size); // 5 tag > 2 tag
+    const acmeLinks = g.links.filter((l) => l.source.includes("acme"));
+    expect(acmeLinks.length).toBeLessThanOrEqual(MESH_K * 5);
+    const acmeNodes = g.nodes.filter((n) => n.domain === "acme").map((n) => n.id);
+    for (const id of acmeNodes) {
+      expect(g.links.some((l) => l.source === id || l.target === id)).toBe(true);
+    }
+  });
 
-    const anna = g.nodes.find((n) => n.data.id === "person:a@acme.hu")!;
-    const bela = g.nodes.find((n) => n.data.id === "person:b@acme.hu")!;
-    expect(anna.data.size).toBe(bela.data.size); // minden ember egyforma
+  it("colors nodes deterministically per organization", () => {
+    const g = toGraph(contacts, orgs);
+    const acme = g.nodes.filter((n) => n.domain === "acme");
+    expect(new Set(acme.map((n) => n.color)).size).toBe(1);
+    expect(colorForOrg("acme")).toBe(colorForOrg("acme"));
+    expect(colorForOrg("acme")).toMatch(/^#/);
   });
 });

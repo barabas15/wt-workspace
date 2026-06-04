@@ -1,22 +1,28 @@
-.contact-list { display: flex; flex-direction: column; height: 100%; background: #fafafb; border-right: 1px solid #e8e8ee; }
-.cl-controls { display: flex; gap: 6px; padding: 8px; border-bottom: 1px solid #eee; }
-.cl-search { flex: 1; padding: 5px 8px; border: 1px solid #dfe1e8; border-radius: 6px; }
-.cl-sort { border: 1px solid #dfe1e8; border-radius: 6px; }
+.contact-list { display: flex; flex-direction: column; height: 100%; background: var(--bg-1); border-right: 1px solid var(--border); }
+.cl-controls { display: flex; gap: 6px; padding: 8px; border-bottom: 1px solid var(--border); }
+.cl-search { flex: 1; padding: 6px 9px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-3); color: var(--text); }
+.cl-search::placeholder { color: var(--text-dim); }
+.cl-sort { appearance: none; -webkit-appearance: none; padding: 6px 9px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-3); color: var(--text); cursor: pointer; }
 .cl-groups { overflow-y: auto; flex: 1; scrollbar-gutter: stable; }
-/* a kuka gomb ne kerüljön a görgetősáv alá */
-.cl-group-header { display: flex; align-items: center; padding-right: 8px; }
-.cl-group-toggle { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: none; border: none; cursor: pointer; font-weight: 600; color: #4858d8; text-align: left; }
-.cl-group-count { margin-left: auto; color: #9aa; font-weight: 400; }
-.cl-group-delete { background: none; border: none; cursor: pointer; padding: 4px 9px; opacity: 0.4; font-size: 13px; flex: none; }
-.cl-group-delete:hover { opacity: 1; }
+
+.cl-group-header { display: flex; align-items: center; padding-right: 8px; border-bottom: 1px solid var(--border); }
+.cl-group-toggle {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; padding: 7px 10px;
+  background: none; border: none; cursor: pointer; text-align: left;
+  font-family: var(--display-font); font-weight: 700; font-size: 13px; letter-spacing: 0.3px; color: var(--brass);
+}
+.cl-group-count { margin-left: auto; color: var(--text-dim); font-weight: 400; font-family: system-ui, sans-serif; }
+.cl-group-delete { background: none; border: none; cursor: pointer; padding: 4px 9px; color: var(--copper); opacity: 0.75; flex: none; display: inline-flex; align-items: center; }
+.cl-group-delete:hover { color: var(--accent-bright); opacity: 1; }
+
 .cl-row { width: 100%; display: flex; align-items: center; padding-right: 10px; }
-.cl-row.selected { background: #eaedff; }
-.cl-row-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 5px 12px; background: none; border: none; cursor: pointer; text-align: left; }
-.cl-row-action { flex: none; background: none; border: none; cursor: pointer; padding: 4px 7px; font-size: 17px; line-height: 1; opacity: 0.45; }
-.cl-row-action:hover { opacity: 1; }
-.cl-row:hover .cl-row-action { opacity: 0.7; }
+.cl-row.selected { background: rgba(232,144,47,0.16); }
+.cl-row-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 5px 12px; background: none; border: none; cursor: pointer; text-align: left; color: var(--text); }
+.cl-row-action { flex: none; background: none; border: none; cursor: pointer; padding: 4px 7px; line-height: 1; color: var(--copper); opacity: 0.7; display: inline-flex; align-items: center; }
+.cl-row-action:hover { color: var(--accent-bright); opacity: 1; }
+.cl-row:hover .cl-row-action { opacity: 0.85; }
 .cl-row:hover .cl-row-action:hover { opacity: 1; }
-.cl-avatar { width: 26px; height: 26px; border-radius: 50%; color: #fff; font-size: 10px; display: flex; align-items: center; justify-content: center; flex: none; }
+.cl-avatar { width: 26px; height: 26px; border-radius: 50%; color: var(--bg-0); font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; border: 1px solid rgba(0,0,0,0.3); }
 .cl-meta { display: flex; flex-direction: column; min-width: 0; }
-.cl-name { font-size: 13px; }
-.cl-email { font-size: 11px; color: #889; overflow: hidden; text-overflow: ellipsis; }
+.cl-name { font-size: 13px; color: var(--text); }
+.cl-email { font-size: 11px; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; }

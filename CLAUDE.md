@@ -90,7 +90,12 @@ A nehéz munka (hálózat, parse, aggregálás, perzisztencia) a Rust magban fut
   a teljes domain; a `label` a capitalizált SLD ("A1").
 - **Teljes sync = csere:** a `run_full_sync` a perzisztálás előtt `clear_all`-lal üríti a
   táblákat (újraaggregál minden levélből), így nincs dupla számolás és nem maradnak elavult sorok.
-- Gráf: **szervezet-hub mérete = tagszám**, **kontakt-csomópont fix méretű** (sosem a levélszámtól).
+- Gráf: **brain-style force-gráf** (`react-force-graph-2d`, canvas). Csak person-csomópontok
+  (nincs org-hub), fix méret, szervezetenkénti szín (`colorForOrg`); **szervezeten belüli
+  korlátozott háló** (gyűrű + `MESH_K`, lineáris él-szám) a `graph.ts` `toGraph`-jában
+  (`{nodes, links}`). Az „Egyéb" kimarad. **Gráf-node kattintás → bal kereső kitöltése** (a `query`
+  a `ContactsModule`-ban van, `onGraphSelect` setSelected+setQuery; kontrollált `ContactList`,
+  nem-üres keresésnél a csoport auto-kinyílik).
 - DB hely: `dirs::data_dir()/ceges-workspace/workspace.sqlite`.
 
 ## Konvenciók
@@ -98,7 +103,11 @@ A nehéz munka (hálózat, parse, aggregálás, perzisztencia) a Rust magban fut
 - **Soha ne commitolj/push+olj git-be explicit engedély nélkül** (globális szabály).
   Jelen állapot: a remote `git@github.com:barabas15/wt-workspace.git` bekötve, de a munka
   **nincs commitolva** (a felhasználó kézzel verzióz). `.env` gitignore-olt.
-- Stílus: komponensenként egyszerű CSS (`*.css`), kék akcentus `#4858d8`, sötét sáv `#22262f`.
+- Stílus: **dark steampunk** (Mahogany & Amber). Központi `src/theme.css` CSS-tokenek
+  (`--bg-0..3`, `--accent` #e8902f, `--accent-bright`, `--brass` #c9a227, `--copper`, `--text`,
+  `--text-dim`, `--border`, `--display-font`); minden komponens-CSS ezekre hivatkozik (ne írj be
+  nyers színt — a `main.tsx` importálja a `theme.css`-t). Display serif: **Cinzel** (`@fontsource/cinzel`,
+  offline). Sync-jelző: forgó fogaskerék (`.gear-spinner`).
 - Rögzítés/jegyzetelés ebbe a fájlba megy (ne belső memóriába).
 
 ## Ismert, nem-blokkoló follow-up-ok

@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
-import cytoscape from "cytoscape";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useMemo, useRef, useState } from "react";
+import ForceGraph2D from "react-force-graph-2d";
 import type { Contact, Organization } from "./types";
 import { toGraph } from "./graph";
 
@@ -11,53 +12,64 @@ interface Props {
 }
 
 export function ContactGraph({ contacts, organizations, selectedEmail, onSelect }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
-  const cyRef = useRef<cytoscape.Core | null>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ w: 0, h: 0 });
 
   useEffect(() => {
-    if (!ref.current) return;
-    const { nodes, edges } = toGraph(contacts, organizations);
-    const cy = cytoscape({
-      container: ref.current,
-      elements: [...nodes, ...edges],
-      style: [
-        {
-          selector: "node",
-          style: {
-            width: "data(size)",
-            height: "data(size)",
-            label: "data(label)",
-            "font-size": 8,
-            "text-valign": "bottom",
-            "background-color": "#7c8cff",
-            color: "#333",
-          },
-        },
-        { selector: 'node[kind = "org"]', style: { "background-color": "#4858d8", color: "#fff", "font-size": 10, "font-weight": "bold" } },
-        { selector: "edge", style: { width: 1, "line-color": "#cfd4ff", "curve-style": "haystack" } },
-        { selector: ".highlighted", style: { "border-width": 3, "border-color": "#ff9d6e" } },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ] as any,
-      layout: { name: "cose", animate: false },
-    });
+    const el = wrapRef.current;
+    if (!el) return;
+    const update = () => setSize({ w: el.clientWidth, h: el.clientHeight });
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
-    cy.on("tap", 'node[kind = "person"]', (evt) => {
-      const id = evt.target.id() as string;
-      onSelect(id.replace(/^person:/, ""));
-    });
+  const data = useMemo(() => toGraph(contacts, organizations), [contacts, organizations]);
+  const selectedId = selectedEmail ? `person:${selectedEmail}` : null;
 
-    cyRef.current = cy;
-    return () => cy.destroy();
-  }, [contacts, organizations, onSelect]);
-
-  useEffect(() => {
-    const cy = cyRef.current;
-    if (!cy) return;
-    cy.elements().removeClass("highlighted");
-    if (selectedEmail) {
-      cy.$(`#person\\:${CSS.escape(selectedEmail)}`).addClass("highlighted");
-    }
-  }, [selectedEmail]);
-
-  return <div className="contact-graph" ref={ref} style={{ width: "100%", height: "100%" }} />;
+  return (
+    <div className="contact-graph" ref={wrapRef}>
+      <ForceGraph2D
+        width={size.w || 600}
+        height={size.h || 400}
+        graphData={data}
+        backgroundColor="#120b08"
+        nodeId="id"
+        nodeLabel="name"
+        linkColor={() => "rgba(201,162,39,0.18)"}
+        linkWidth={0.6}
+        cooldownTicks={120}
+        onNodeClick={(n: any) => onSelect(String(n.id).replace(/^person:/, ""))}
+        nodeCanvasObjectMode={() => "replace"}
+        nodeCanvasObject={(node: any, ctx: CanvasRenderingContext2D, scale: number) => {
+          if (node.x == null || node.y == null) return;
+          const r = (node.val ?? 4) + 1.5;
+          const isSel = node.id === selectedId;
+          const grd = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, r * 3);
+          grd.addColorStop(0, node.color);
+          grd.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = grd;
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, r * 3, 0, 2 * Math.PI);
+          ctx.fill();
+          ctx.fillStyle = isSel ? "#ffb84d" : node.color;
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, isSel ? r * 1.6 : r, 0, 2 * Math.PI);
+          ctx.fill();
+          if (isSel) {
+            ctx.strokeStyle = "#ffe7b3";
+            ctx.lineWidth = 1.5 / scale;
+            ctx.stroke();
+          }
+          if (scale > 2.2 || isSel) {
+            ctx.font = `${11 / scale}px system-ui, sans-serif`;
+            ctx.fillStyle = "#ecd9c0";
+            ctx.textAlign = "center";
+            ctx.fillText(node.name, node.x, node.y + r * 3 + 9 / scale);
+          }
+        }}
+      />
+    </div>
+  );
 }

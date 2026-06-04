@@ -1,0 +1,48 @@
+:root {
+  color-scheme: dark;
+  /* Mahogany & Amber paletta */
+  --bg-0: #120b08;
+  --bg-1: #1e1410;
+  --bg-2: #241712;
+  --bg-3: #2e1f18;
+  --accent: #e8902f;
+  --accent-bright: #ffb84d;
+  --brass: #c9a227;
+  --copper: #b87333;
+  --text: #ecd9c0;
+  --text-dim: #a8906f;
+  --border: #3a241b;
+  --display-font: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+}
+
+html, body, #root { height: 100%; margin: 0; }
+body {
+  background: var(--bg-0);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* steampunk scrollbar */
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track { background: var(--bg-1); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--copper), #6e4a25);
+  border: 2px solid var(--bg-1);
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, var(--brass), var(--copper)); }
+
+::selection { background: var(--accent); color: var(--bg-0); }
+
+/* finom fém-fény segédosztály panelekhez */
+.metal-sheen {
+  background-image: linear-gradient(160deg, rgba(255,255,255,0.04), rgba(0,0,0,0) 40%);
+}
+
+/* forgó fogaskerék spinner (a sync jelzéséhez) */
+.gear-spinner {
+  width: 15px; height: 15px; flex: none;
+  color: var(--brass);
+  animation: gear-spin 2.4s linear infinite;
+}
+@keyframes gear-spin { to { transform: rotate(360deg); } }

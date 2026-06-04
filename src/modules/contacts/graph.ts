@@ -1,44 +1,84 @@
 import type { Contact, Organization } from "./types";
 
-export interface GraphNode {
-  data: { id: string; label: string; kind: "org" | "person"; size: number; domain: string };
+export interface FgNode {
+  id: string;
+  name: string;
+  domain: string;
+  color: string;
+  val: number;
 }
-export interface GraphEdge {
-  data: { id: string; source: string; target: string };
+export interface FgLink {
+  source: string;
+  target: string;
 }
-export interface Graph {
-  nodes: GraphNode[];
-  edges: GraphEdge[];
+export interface ForceGraphData {
+  nodes: FgNode[];
+  links: FgLink[];
 }
 
-const PERSON_SIZE = 18; // minden ember egyforma
-const ORG_BASE = 28;
-const ORG_PER_MEMBER = 4;
+/** Hány "következő" taghoz kösse a klaszter minden tagját (a gyűrűn felül). A teljes
+ * mindenki-mindenkivel helyett ez lineáris él-számot ad, nagy szervezetnél is gyors. */
+export const MESH_K = 2;
 
-export function toGraph(contacts: Contact[], orgs: Organization[]): Graph {
-  const nodes: GraphNode[] = [];
-  const edges: GraphEdge[] = [];
+const NODE_VAL = 4; // minden ember egyforma méretű
 
-  // az "Egyéb" gyűjtő (is_personal) NEM jelenik meg a gráfban — sem a szervezet-csomópont,
-  // sem a hozzá tartozó kontaktok.
+/** Steampunk node-palettát (sárgaréz/réz/borostyán + 1 patina) ad determinisztikusan. */
+const ORG_COLORS = [
+  "#e8902f", "#c9a227", "#b87333", "#d9a441",
+  "#a8602a", "#caa75a", "#8a6d3b", "#d57a28", "#3fae9f",
+];
+export function colorForOrg(domain: string): string {
+  let h = 0;
+  for (let i = 0; i < domain.length; i++) h = (h * 31 + domain.charCodeAt(i)) >>> 0;
+  return ORG_COLORS[h % ORG_COLORS.length];
+}
+
+/** Egy szervezet tagjait gyűrűvel + MESH_K szomszéddal köti össze (dedup, nincs self-link). */
+function clusterLinks(ids: string[]): FgLink[] {
+  const links: FgLink[] = [];
+  const n = ids.length;
+  if (n < 2) return links;
+  const seen = new Set<string>();
+  for (let i = 0; i < n; i++) {
+    for (let j = 1; j <= MESH_K; j++) {
+      if (j >= n) break;
+      const a = ids[i];
+      const b = ids[(i + j) % n];
+      if (a === b) continue;
+      const key = a < b ? `${a}|${b}` : `${b}|${a}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      links.push({ source: a, target: b });
+    }
+  }
+  return links;
+}
+
+export function toGraph(contacts: Contact[], orgs: Organization[]): ForceGraphData {
   const personalDomains = new Set(orgs.filter((o) => o.is_personal).map((o) => o.domain));
 
-  for (const o of orgs) {
-    if (o.is_personal) continue;
-    nodes.push({
-      data: { id: `org:${o.domain}`, label: o.label, kind: "org", size: ORG_BASE + o.member_count * ORG_PER_MEMBER, domain: o.domain },
-    });
-  }
+  const nodes: FgNode[] = [];
+  const byOrg = new Map<string, string[]>();
 
   for (const c of contacts) {
     if (personalDomains.has(c.organization_domain)) continue;
+    const id = `person:${c.email}`;
     nodes.push({
-      data: { id: `person:${c.email}`, label: c.display_name || c.email, kind: "person", size: PERSON_SIZE, domain: c.organization_domain },
+      id,
+      name: c.display_name || c.email,
+      domain: c.organization_domain,
+      color: colorForOrg(c.organization_domain),
+      val: NODE_VAL,
     });
-    edges.push({
-      data: { id: `edge:${c.email}`, source: `org:${c.organization_domain}`, target: `person:${c.email}` },
-    });
+    const arr = byOrg.get(c.organization_domain) ?? [];
+    arr.push(id);
+    byOrg.set(c.organization_domain, arr);
   }
 
-  return { nodes, edges };
+  const links: FgLink[] = [];
+  for (const ids of byOrg.values()) {
+    links.push(...clusterLinks(ids));
+  }
+
+  return { nodes, links };
 }

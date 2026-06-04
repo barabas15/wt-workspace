@@ -1,17 +1,17 @@
-.shell { display: flex; height: 100vh; width: 100vw; overflow: hidden; }
+.shell { display: flex; height: 100vh; width: 100vw; overflow: hidden; background: var(--bg-0); }
 .rail {
-  width: 96px; background: #22262f; color: #c6ccd8;
+  width: 96px; background: var(--bg-2); color: var(--text-dim);
   display: flex; flex-direction: column; justify-content: space-between;
-  padding: 14px 0; flex: none;
+  padding: 14px 0; flex: none; border-right: 1px solid var(--border);
 }
 .rail-btn {
-  width: 76px; height: 66px; margin: 6px auto; border: none; cursor: pointer;
-  background: #363c49; color: #c6ccd8; border-radius: 12px;
+  width: 76px; height: 66px; margin: 6px auto; border: 1px solid transparent; cursor: pointer;
+  background: var(--bg-3); color: var(--text-dim); border-radius: 12px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-.rail-btn:hover { background: #424a5c; color: #fff; }
-.rail-btn.active { background: #4858d8; color: #fff; }
+.rail-btn:hover { background: #3a2a1f; color: var(--text); border-color: var(--border); }
+.rail-btn.active { background: var(--accent); color: var(--bg-0); border-color: var(--accent-bright); }
 .rail-icon { font-size: 26px; line-height: 1; }
-.rail-label { font-size: 11px; font-weight: 500; }
+.rail-label { font-size: 11px; font-weight: 600; font-family: var(--display-font); letter-spacing: 0.3px; }
 .content { flex: 1; min-width: 0; overflow: hidden; }

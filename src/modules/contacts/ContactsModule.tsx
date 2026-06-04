@@ -11,6 +11,7 @@ export function ContactsModule() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [orgs, setOrgs] = useState<Organization[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
   const [syncing, setSyncing] = useState(false);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
 
@@ -45,6 +46,11 @@ export function ContactsModule() {
       un3.then((f) => f());
     };
   }, [loadData]);
+
+  const onGraphSelect = (email: string) => {
+    setSelected(email);
+    setQuery(email);
+  };
 
   const onConnect = async () => {
     try {
@@ -87,7 +93,10 @@ export function ContactsModule() {
         <div className="cm-bar-right">
           {syncing && (
             <span className="cm-progress" role="status" aria-live="polite">
-              <span className="cm-spinner" aria-hidden="true" />
+              <svg className="gear-spinner" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 8a4 4 0 100 8 4 4 0 000-8zm0 6a2 2 0 110-4 2 2 0 010 4z" />
+                <path d="M21 12l-2-1.2.5-2.3-2.1-1.1-1.6 1.7-2.2-.7L12 6l-1.6 2.4-2.2.7L6.6 7.4 4.5 8.5 5 10.8 3 12l2 1.2-.5 2.3 2.1 1.1 1.6-1.7 2.2.7L12 18l1.6-2.4 2.2-.7 1.6 1.7 2.1-1.1-.5-2.3L21 12z" opacity="0.55" />
+              </svg>
               {progress
                 ? `${progress.done}/${progress.total} levél feldolgozva`
                 : "Levelezés beolvasása…"}
@@ -108,10 +117,18 @@ export function ContactsModule() {
       </header>
       <div className="cm-split">
         <div className="cm-list">
-          <ContactList contacts={contacts} organizations={orgs} selectedEmail={selected} onSelect={setSelected} onDeleteOrg={onDeleteOrg} />
+          <ContactList
+            contacts={contacts}
+            organizations={orgs}
+            query={query}
+            onQueryChange={setQuery}
+            selectedEmail={selected}
+            onSelect={setSelected}
+            onDeleteOrg={onDeleteOrg}
+          />
         </div>
         <div className="cm-graph">
-          <ContactGraph contacts={contacts} organizations={orgs} selectedEmail={selected} onSelect={setSelected} />
+          <ContactGraph contacts={contacts} organizations={orgs} selectedEmail={selected} onSelect={onGraphSelect} />
         </div>
       </div>
     </div>

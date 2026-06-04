@@ -8,15 +8,19 @@ import "./ContactList.css";
 interface Props {
   contacts: Contact[];
   organizations: Organization[];
+  query: string;
+  onQueryChange: (q: string) => void;
   selectedEmail: string | null;
   onSelect: (email: string) => void;
   onDeleteOrg?: (domain: string) => void;
 }
 
-export function ContactList({ contacts, organizations, selectedEmail, onSelect, onDeleteOrg }: Props) {
-  const [query, setQuery] = useState("");
+export function ContactList({
+  contacts, organizations, query, onQueryChange, selectedEmail, onSelect, onDeleteOrg,
+}: Props) {
   const [sort, setSort] = useState<SortKey>("name");
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const searching = query.trim().length > 0;
 
   const groups = useMemo(() => {
     const filtered = filterContacts(contacts, organizations, query);
@@ -31,7 +35,7 @@ export function ContactList({ contacts, organizations, selectedEmail, onSelect, 
           className="cl-search"
           placeholder="Keresés…"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => onQueryChange(e.target.value)}
         />
         <select className="cl-sort" value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
           <option value="name">Név</option>
@@ -41,8 +45,7 @@ export function ContactList({ contacts, organizations, selectedEmail, onSelect, 
       </div>
       <div className="cl-groups">
         {groups.map(({ org, contacts: cs }) => {
-          // a csoportok alapból CSUKVA vannak
-          const isCollapsed = collapsed[org.domain] ?? true;
+          const isCollapsed = collapsed[org.domain] ?? !searching;
           return (
             <div key={org.domain} className="cl-group">
               <div className="cl-group-header">
@@ -61,16 +64,17 @@ export function ContactList({ contacts, organizations, selectedEmail, onSelect, 
                     title="Csoport törlése (tagjai az Egyéb alá kerülnek)"
                     onClick={() => onDeleteOrg(org.domain)}
                   >
-                    🗑
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M3 6h18" />
+                      <path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" />
+                      <path d="M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14" />
+                    </svg>
                   </button>
                 )}
               </div>
               {!isCollapsed &&
                 cs.map((c) => (
-                  <div
-                    key={c.email}
-                    className={`cl-row ${selectedEmail === c.email ? "selected" : ""}`}
-                  >
+                  <div key={c.email} className={`cl-row ${selectedEmail === c.email ? "selected" : ""}`}>
                     <button className="cl-row-main" onClick={() => onSelect(c.email)}>
                       <span className="cl-avatar" style={{ background: colorFor(c.email) }}>
                         {initials(c.display_name, c.email)}
@@ -86,7 +90,10 @@ export function ContactList({ contacts, organizations, selectedEmail, onSelect, 
                       title="Új levél (Gmail)"
                       onClick={() => openGmailCompose(c.email)}
                     >
-                      ✉
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                        <path d="m3 7 9 6 9-6" />
+                      </svg>
                     </button>
                     <button
                       className="cl-row-action"
@@ -94,7 +101,10 @@ export function ContactList({ contacts, organizations, selectedEmail, onSelect, 
                       title="Levelezés keresése (Gmail)"
                       onClick={() => openGmailSearch(c.email)}
                     >
-                      🔍
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7" />
+                        <path d="m20 20-3.5-3.5" />
+                      </svg>
                     </button>
                   </div>
                 ))}

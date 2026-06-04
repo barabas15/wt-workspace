@@ -1,23 +1,30 @@
-.contacts-module { display: flex; flex-direction: column; height: 100%; }
-.cm-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; border-bottom: 1px solid #e2e4ea; background: #f1f2f5; }
-.cm-bar-right { display: flex; align-items: center; gap: 10px; }
-.cm-progress { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: #667; }
-.cm-spinner {
-  width: 13px; height: 13px; border-radius: 50%;
-  border: 2px solid #c7ccda; border-top-color: #4858d8;
-  animation: cm-spin 0.7s linear infinite; flex: none;
+.contacts-module { display: flex; flex-direction: column; height: 100%; background: var(--bg-0); }
+.cm-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  background: var(--bg-1); background-image: linear-gradient(160deg, rgba(255,255,255,0.04), rgba(0,0,0,0) 45%);
 }
-@keyframes cm-spin { to { transform: rotate(360deg); } }
+.cm-bar > strong {
+  font-family: var(--display-font); font-size: 17px; letter-spacing: 1px;
+  color: var(--text); border-bottom: 2px solid var(--brass); padding-bottom: 2px;
+}
+.cm-bar-right { display: flex; align-items: center; gap: 12px; }
+.cm-progress { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-dim); }
+
 .cm-btn {
   display: inline-flex; align-items: center; gap: 7px;
-  padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer;
-  background: #4858d8; color: #fff; font-size: 13px; font-weight: 600;
-  box-shadow: 0 1px 2px rgba(34, 38, 47, 0.15); transition: background 0.15s, box-shadow 0.15s;
+  padding: 8px 16px; border: 1px solid var(--brass); border-radius: 8px; cursor: pointer;
+  background: var(--accent); color: var(--bg-0); font-size: 13px; font-weight: 700;
+  font-family: var(--display-font); letter-spacing: 0.4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.4); transition: background 0.15s, box-shadow 0.15s;
 }
-.cm-btn:hover:not(:disabled) { background: #3a48bf; box-shadow: 0 2px 6px rgba(34, 38, 47, 0.22); }
-.cm-btn:active:not(:disabled) { background: #333fa0; box-shadow: none; }
-.cm-btn:disabled { background: #aab0c6; cursor: default; box-shadow: none; }
+.cm-btn:hover:not(:disabled) { background: var(--accent-bright); box-shadow: 0 2px 7px rgba(232,144,47,0.35); }
+.cm-btn:active:not(:disabled) { background: var(--copper); }
+.cm-btn:disabled { background: #5a4632; color: var(--text-dim); border-color: var(--border); cursor: default; box-shadow: none; }
 .cm-btn-icon { font-size: 15px; line-height: 1; }
+
 .cm-split { display: flex; flex: 1; min-height: 0; }
 .cm-list { width: 42%; min-width: 280px; max-width: 460px; }
-.cm-graph { flex: 1; min-width: 0; background: #fbfbfd; }
+.cm-graph { flex: 1; min-width: 0; background: radial-gradient(circle at 55% 50%, #1a1009, var(--bg-0)); }
+/* a react-force-graph canvas a konténer méretét veszi — kell explicit méret, különben 0 */
+.contact-graph { width: 100%; height: 100%; overflow: hidden; }
