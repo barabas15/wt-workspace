@@ -20,6 +20,10 @@ hub & spoke gráfot** + listát jelenít meg (osztott nézet).
   **re-sync után is megmarad** (a `sync` az `aggregate_with_merges`-t hívja). Parancs:
   `delete_organization(domain)` → `db::delete_organization` (hálózat nélkül újraszámol a
   tárolt kontaktokból).
+- **Sor-gyorsműveletek (kontaktonként):** ✉ = Gmail új levél (címzett kitöltve), 🔍 = Gmail
+  keresés a címre. A default böngészőben nyílnak: `@tauri-apps/plugin-opener` `openUrl()`,
+  URL-építők a `src/modules/contacts/gmailLinks.ts`-ben (`opener:default` engedély már megvan).
+  A sor flex: `.cl-row-main` (kiválasztás) + `.cl-row-action` ikongombok.
 
 - Spec: `docs/superpowers/specs/2026-06-04-gmail-kontakt-workspace-design.md`
 - Részletes terv: `docs/superpowers/plans/2026-06-04-gmail-kontakt-workspace.md`

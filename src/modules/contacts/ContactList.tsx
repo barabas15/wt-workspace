@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import type { Contact, Organization } from "./types";
 import { groupByOrg, filterContacts, sortContacts, type SortKey } from "./list";
 import { initials, colorFor } from "./avatar";
+import { openGmailCompose, openGmailSearch } from "./gmailLinks";
 import "./ContactList.css";
 
 interface Props {
@@ -66,19 +67,36 @@ export function ContactList({ contacts, organizations, selectedEmail, onSelect, 
               </div>
               {!isCollapsed &&
                 cs.map((c) => (
-                  <button
+                  <div
                     key={c.email}
                     className={`cl-row ${selectedEmail === c.email ? "selected" : ""}`}
-                    onClick={() => onSelect(c.email)}
                   >
-                    <span className="cl-avatar" style={{ background: colorFor(c.email) }}>
-                      {initials(c.display_name, c.email)}
-                    </span>
-                    <span className="cl-meta">
-                      <span className="cl-name">{c.display_name || c.email}</span>
-                      <span className="cl-email">{c.email}</span>
-                    </span>
-                  </button>
+                    <button className="cl-row-main" onClick={() => onSelect(c.email)}>
+                      <span className="cl-avatar" style={{ background: colorFor(c.email) }}>
+                        {initials(c.display_name, c.email)}
+                      </span>
+                      <span className="cl-meta">
+                        <span className="cl-name">{c.display_name || c.email}</span>
+                        <span className="cl-email">{c.email}</span>
+                      </span>
+                    </button>
+                    <button
+                      className="cl-row-action"
+                      aria-label={`Levél írása neki: ${c.email}`}
+                      title="Új levél (Gmail)"
+                      onClick={() => openGmailCompose(c.email)}
+                    >
+                      ✉
+                    </button>
+                    <button
+                      className="cl-row-action"
+                      aria-label={`Levelezés keresése: ${c.email}`}
+                      title="Levelezés keresése (Gmail)"
+                      onClick={() => openGmailSearch(c.email)}
+                    >
+                      🔍
+                    </button>
+                  </div>
                 ))}
             </div>
           );

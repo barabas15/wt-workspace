@@ -1,6 +1,11 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
+
+vi.mock("@tauri-apps/plugin-opener", () => ({ openUrl: vi.fn() }));
+
 import { ContactList } from "./ContactList";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import { composeUrl, searchUrl } from "./gmailLinks";
 import type { Contact, Organization } from "./types";
 
 const orgs: Organization[] = [
@@ -11,6 +16,8 @@ const contacts: Contact[] = [
 ];
 
 describe("ContactList", () => {
+  beforeEach(() => vi.clearAllMocks());
+
   it("collapses groups by default and fires selection after expanding", () => {
     const onSelect = vi.fn();
     render(<ContactList contacts={contacts} organizations={orgs} selectedEmail={null} onSelect={onSelect} />);
@@ -42,5 +49,16 @@ describe("ContactList", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: /acme csoport törlése/i }));
     expect(onDeleteOrg).toHaveBeenCalledWith("acme.hu");
+  });
+
+  it("opens Gmail compose and search for a contact via the row icons", () => {
+    render(<ContactList contacts={contacts} organizations={orgs} selectedEmail={null} onSelect={() => {}} />);
+    fireEvent.click(screen.getByText("Acme")); // csoport kinyitása
+
+    fireEvent.click(screen.getByRole("button", { name: /levél írása neki: a@acme\.hu/i }));
+    expect(openUrl).toHaveBeenCalledWith(composeUrl("a@acme.hu"));
+
+    fireEvent.click(screen.getByRole("button", { name: /levelezés keresése: a@acme\.hu/i }));
+    expect(openUrl).toHaveBeenCalledWith(searchUrl("a@acme.hu"));
   });
 });
